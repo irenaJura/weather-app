@@ -1,11 +1,13 @@
-import { Component, inject } from '@angular/core';
-import { MatTableModule } from '@angular/material/table';
+import { Component, inject, OnInit, ViewChild } from '@angular/core';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { WeatherData } from '../../models/weather-data.model';
 import { WeatherService } from '../../services/weather.service';
 import { CommonModule } from '@angular/common';
 import { catchError, EMPTY, forkJoin } from 'rxjs';
+import { MatInputModule } from '@angular/material/input';
+import { WeatherTableData } from '../../models/weather-table-data.interface';
 
 @Component({
   selector: 'app-dashboard',
@@ -15,12 +17,13 @@ import { catchError, EMPTY, forkJoin } from 'rxjs';
     MatTableModule,
     MatCardModule,
     MatProgressSpinnerModule,
+    MatInputModule,
   ],
   providers: [WeatherService],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css',
 })
-export class DashboardComponent {
+export class DashboardComponent implements OnInit {
   private weatherService = inject(WeatherService);
   displayedColumns: string[] = ['city', 'temp', 'humidity', 'condition'];
 
@@ -36,6 +39,8 @@ export class DashboardComponent {
   ];
 
   isLoading = true;
+
+  dataSource!: MatTableDataSource<WeatherTableData>;
 
   ngOnInit() {
     this.fetchWeatherData();
@@ -65,7 +70,13 @@ export class DashboardComponent {
           );
 
           this.isLoading = false;
+          this.dataSource = new MatTableDataSource(this.testWeatherData);
         },
       });
+  }
+
+  applyFilter(event: Event) {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.dataSource.filter = filterValue.trim().toLowerCase();
   }
 }
