@@ -1,5 +1,12 @@
 <mat-card>
   <h2>Weather Overview</h2>
+
+  <!-- Loading Spinner -->
+  @if (isLoading) {
+  <div class="loading-spinner">
+    <mat-spinner></mat-spinner>
+  </div>
+  } @else {
   <table mat-table [dataSource]="testWeatherData">
 
     <!-- City Column -->
@@ -11,22 +18,41 @@
     <!-- Temperature Column -->
     <ng-container matColumnDef="temp">
       <th mat-header-cell *matHeaderCellDef> Temperature (°C) </th>
-      <td mat-cell *matCellDef="let element"> {{ element.data?.current.temp }} </td>
+      <td mat-cell *matCellDef="let element">
+        @if (element.data) {
+        {{ element.data.current.temp }}
+        } @else {
+        --
+        }
+      </td>
     </ng-container>
 
     <!-- Humidity Column -->
     <ng-container matColumnDef="humidity">
       <th mat-header-cell *matHeaderCellDef> Humidity (%) </th>
-      <td mat-cell *matCellDef="let element"> {{ element.data?.current.humidity }} </td>
+      <td mat-cell *matCellDef="let element">
+        @if (element.data) {
+        {{ element.data.current.humidity }}
+        } @else {
+        --
+        }
+      </td>
     </ng-container>
 
     <!-- Condition Column -->
     <ng-container matColumnDef="condition">
       <th mat-header-cell *matHeaderCellDef> Condition </th>
-      <td mat-cell *matCellDef="let element"> {{ element.data?.current.weather[0]?.description }} </td>
+      <td mat-cell *matCellDef="let element">
+        @if (element.data) {
+        {{ element.data.current.weather[0]?.description }}
+        } @else {
+        --
+        }
+      </td>
     </ng-container>
 
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
     <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
   </table>
+  }
 </mat-card>
