@@ -1,4 +1,10 @@
-import { Component, inject, OnInit, ViewChild } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  inject,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -8,6 +14,8 @@ import { CommonModule } from '@angular/common';
 import { catchError, EMPTY, forkJoin } from 'rxjs';
 import { MatInputModule } from '@angular/material/input';
 import { WeatherTableData } from '../../models/weather-table-data.interface';
+import { MatSort } from '@angular/material/sort';
+import { MatSortModule } from '@angular/material/sort';
 
 @Component({
   selector: 'app-dashboard',
@@ -18,6 +26,7 @@ import { WeatherTableData } from '../../models/weather-table-data.interface';
     MatCardModule,
     MatProgressSpinnerModule,
     MatInputModule,
+    MatSortModule,
   ],
   providers: [WeatherService],
   templateUrl: './dashboard.component.html',
@@ -25,6 +34,7 @@ import { WeatherTableData } from '../../models/weather-table-data.interface';
 })
 export class DashboardComponent implements OnInit {
   private weatherService = inject(WeatherService);
+  private changeDetectorRef = inject(ChangeDetectorRef);
   displayedColumns: string[] = ['city', 'temp', 'humidity', 'condition'];
 
   testWeatherData: {
@@ -40,7 +50,9 @@ export class DashboardComponent implements OnInit {
 
   isLoading = true;
 
-  dataSource!: MatTableDataSource<WeatherTableData>;
+  dataSource = new MatTableDataSource<WeatherTableData>([]);
+
+  @ViewChild(MatSort) sort!: MatSort;
 
   ngOnInit() {
     this.fetchWeatherData();
@@ -63,20 +75,41 @@ export class DashboardComponent implements OnInit {
           return EMPTY;
         })
       )
-      .subscribe({
-        next: (results) => {
-          results.forEach(
-            (data, index) => (this.testWeatherData[index].data = data)
-          );
-
-          this.isLoading = false;
-          this.dataSource = new MatTableDataSource(this.testWeatherData);
-        },
+      .subscribe((results) => {
+        results.forEach(
+          (data, index) => (this.testWeatherData[index].data = data)
+        );
+        this.isLoading = false;
+        this.dataSource.data = this.testWeatherData;
+        // ensure table got new data before sorting
+        this.changeDetectorRef.detectChanges();
+        this.dataSource.sort = this.sort;
+        this.initSort();
       });
   }
 
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
     this.dataSource.filter = filterValue.trim().toLowerCase();
+  }
+
+  private initSort() {
+    this.dataSource.sortingDataAccessor = (
+      item: WeatherTableData,
+      property: string
+    ) => {
+      switch (property) {
+        case 'city':
+          return item.city;
+        case 'temp':
+          return item.data?.current.temp || 0;
+        case 'humidity':
+          return item.data?.current.humidity || 0;
+        case 'condition':
+          return item.data?.current.weather[0]?.description || '';
+        default:
+          return '';
+      }
+    };
   }
 }
