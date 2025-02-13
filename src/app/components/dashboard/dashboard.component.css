@@ -14,14 +14,7 @@ table {
   text-align: center;
 }
 
-.error-message {
-  text-align: center;
-  font-size: 16px;
-  color: #666;
-  margin: 15px 0;
-}
-
-.error-message {
-  color: red;
-  font-weight: bold;
+mat-form-field {
+  width: 300px;
+  margin: 10px 0;
 }
