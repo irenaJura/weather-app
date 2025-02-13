@@ -69,6 +69,7 @@ export class DashboardComponent implements OnInit {
 
   chartLegend = true;
   chartVisible = false;
+  selectedCity = '';
 
   ngOnInit() {
     this.fetchWeatherData();
@@ -113,8 +114,13 @@ export class DashboardComponent implements OnInit {
   }
 
   onCityClick(cityData: any): void {
-    console.log(cityData);
     this.chartVisible = true;
+
+    if (this.selectedCity === cityData.city) {
+      return;
+    }
+
+    this.selectedCity = cityData.city;
     const weather = cityData.data as WeatherData;
 
     const dailyData = weather.daily;
