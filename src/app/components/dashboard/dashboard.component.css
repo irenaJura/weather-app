@@ -18,3 +18,10 @@ mat-form-field {
   width: 300px;
   margin: 10px 0;
 }
+
+.chart-container {
+  width: 50%;
+  height: 400px;
+  max-width: 800px;
+  margin: 20px auto;
+}

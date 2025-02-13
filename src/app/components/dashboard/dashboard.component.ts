@@ -11,11 +11,13 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { WeatherData } from '../../models/weather-data.model';
 import { WeatherService } from '../../services/weather.service';
 import { CommonModule } from '@angular/common';
-import { catchError, EMPTY, forkJoin } from 'rxjs';
+import { catchError, EMPTY, forkJoin, tap } from 'rxjs';
 import { MatInputModule } from '@angular/material/input';
 import { WeatherTableData } from '../../models/weather-table-data.interface';
 import { MatSort } from '@angular/material/sort';
 import { MatSortModule } from '@angular/material/sort';
+import { BaseChartDirective } from 'ng2-charts';
+import { ChartDataset } from 'chart.js';
 
 @Component({
   selector: 'app-dashboard',
@@ -27,6 +29,7 @@ import { MatSortModule } from '@angular/material/sort';
     MatProgressSpinnerModule,
     MatInputModule,
     MatSortModule,
+    BaseChartDirective,
   ],
   providers: [WeatherService],
   templateUrl: './dashboard.component.html',
@@ -48,11 +51,24 @@ export class DashboardComponent implements OnInit {
     { city: 'Tokyo', lat: 35.682839, lon: 139.759455 },
   ];
 
-  isLoading = true;
+  isLoading = false;
 
   dataSource = new MatTableDataSource<WeatherTableData>([]);
 
   @ViewChild(MatSort) sort!: MatSort;
+
+  chartData: ChartDataset<'line'>[] = [];
+  chartLabels: string[] = [];
+  chartOptions = {
+    responsive: true,
+    scales: {
+      x: { title: { display: true, text: 'Days' } },
+      y: { title: { display: true, text: 'Temperature (°C)' } },
+    },
+  };
+
+  chartLegend = true;
+  chartVisible = false;
 
   ngOnInit() {
     this.fetchWeatherData();
@@ -61,6 +77,9 @@ export class DashboardComponent implements OnInit {
   fetchWeatherData() {
     const requests = this.testWeatherData.map((cityData) =>
       this.weatherService.getWeatherData(cityData.lat, cityData.lon).pipe(
+        tap(() => {
+          this.isLoading = true;
+        }),
         catchError((error) => {
           this.isLoading = false;
           return EMPTY;
@@ -91,6 +110,34 @@ export class DashboardComponent implements OnInit {
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
     this.dataSource.filter = filterValue.trim().toLowerCase();
+  }
+
+  onCityClick(cityData: any): void {
+    console.log(cityData);
+    this.chartVisible = true;
+    const weather = cityData.data as WeatherData;
+
+    const dailyData = weather.daily;
+
+    this.chartLabels = dailyData.map((day) => {
+      const date = new Date(day.dt * 1000);
+      return date.toLocaleDateString('en-US', { weekday: 'long' });
+    });
+
+    this.chartData = [
+      {
+        data: dailyData.map((day) => +day.temp.max.toFixed(1)),
+        label: 'Max Temperature',
+        borderColor: 'red',
+        fill: true,
+      },
+      {
+        data: dailyData.map((day) => +day.temp.min.toFixed(1)),
+        label: 'Min Temperature',
+        borderColor: 'blue',
+        fill: true,
+      },
+    ];
   }
 
   private initSort() {
