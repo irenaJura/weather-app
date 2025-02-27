@@ -9,7 +9,6 @@ export interface WeatherData {
       icon: string;
     }[];
   };
-
   daily: {
     dt: number;
     temp: {

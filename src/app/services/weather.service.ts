@@ -3,6 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { EMPTY, Observable } from 'rxjs';
 import { environment } from '../env/environment';
 import { WeatherData } from '../models/weather-data.model';
+import { City } from '../models/city.model';
 
 @Injectable({
   providedIn: 'root',
@@ -31,7 +32,7 @@ export class WeatherService {
     return this.http.get<WeatherData>(this.apiUrl, { params });
   }
 
-  getCitySuggestions(query: string): Observable<any> {
+  getCitySuggestions(query: string): Observable<City[]> {
     const params = new HttpParams()
       .set('q', query)
       .set('appid', this.apiKey)

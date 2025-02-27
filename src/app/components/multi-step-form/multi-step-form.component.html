@@ -1,33 +1,30 @@
 <mat-form-field class="full-width">
-  <mat-label>Select Cities</mat-label>
+  <mat-label>Search For Cities</mat-label>
   <input type="text" matInput [formControl]="cityControl" [matAutocomplete]="auto">
 
   <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onCitySelect($event.option.value)">
-    @if(isLoading) {
+    @if (isLoading) {
     <mat-option disabled>
       Loading...
     </mat-option>
     }
-    @if(citySuggestions$ | async; as cities) {
-    @for(city of cities; track city.name) {
+
+    @for (city of citySuggestions; track city.name) {
     <mat-option [value]="city.name">
       {{ city.name }} - {{ city.country }}
     </mat-option>
     }
 
-    @if(!isLoading && cities.length === 0) {
-    <mat-option disabled>
-      No cities found
-    </mat-option>
-    }
+    @if (!isLoading && citySuggestions.length === 0 && (cityControl.value?.length ?? 0) > 2) {
+    <mat-option disabled>No cities found</mat-option>
     }
   </mat-autocomplete>
 </mat-form-field>
 
 <mat-chip-listbox>
-  @for(city of selectedCities; track city) {
+  @for (city of selectedCities; track city) {
   <mat-chip [removable]="true" (removed)="removeCity(city)">
-    {{ city}}
+    {{ city }}
     <mat-icon matChipRemove>cancel</mat-icon>
   </mat-chip>
   }
