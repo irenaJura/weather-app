@@ -1,6 +1,11 @@
 import { Component, DestroyRef, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import {
+  FormControl,
+  FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+} from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -10,8 +15,6 @@ import {
   distinctUntilChanged,
   EMPTY,
   finalize,
-  Observable,
-  of,
   switchMap,
   tap,
 } from 'rxjs';
@@ -20,6 +23,7 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { City } from '../../models/city.model';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'multi-step-form',
@@ -34,13 +38,23 @@ import { City } from '../../models/city.model';
     MatAutocompleteModule,
     MatChipsModule,
     MatIconModule,
+    MatButtonModule,
   ],
+  styleUrls: ['./multi-step-form.component.scss'],
 })
 export class MultiStepFormComponent {
-  cityControl = new FormControl('');
+  cityForm = new FormGroup({
+    cityInput: new FormControl(''),
+  });
   citySuggestions: City[] = [];
   selectedCities: string[] = [];
   isLoading = false;
+  formSubmitted = false;
+
+  get cityControl(): FormControl {
+    return this.cityForm.get('cityInput') as FormControl;
+  }
+
   private weatherService = inject(WeatherService);
   private destroyRef = inject(DestroyRef);
 
@@ -51,6 +65,7 @@ export class MultiStepFormComponent {
         distinctUntilChanged(),
         tap(() => (this.isLoading = true)),
         switchMap((value) => {
+          value = value.trim();
           if (value && value.length > 2) {
             return this.weatherService.getCitySuggestions(value).pipe(
               tap((data) => (this.citySuggestions = data)),
@@ -72,7 +87,7 @@ export class MultiStepFormComponent {
 
   onCitySelect(city: string): void {
     if (!this.selectedCities.includes(city)) {
-      this.selectedCities.push(city);
+      this.selectedCities = [...this.selectedCities, city];
       this.cityControl.setValue('');
       this.citySuggestions = [];
     }
@@ -80,5 +95,18 @@ export class MultiStepFormComponent {
 
   removeCity(city: string): void {
     this.selectedCities = this.selectedCities.filter((c) => c !== city);
+  }
+
+  proceedToNextStep(): void {
+    this.formSubmitted = true;
+
+    if (this.selectedCities.length === 0) {
+      return;
+    }
+
+    if (this.cityForm.valid) {
+      console.log('Selected cities:', this.selectedCities);
+      // Proceed to next step
+    }
   }
 }

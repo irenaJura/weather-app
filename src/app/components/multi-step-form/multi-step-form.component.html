@@ -1,31 +1,41 @@
-<mat-form-field class="full-width">
-  <mat-label>Search For Cities</mat-label>
-  <input type="text" matInput [formControl]="cityControl" [matAutocomplete]="auto">
+<form [formGroup]="cityForm" (ngSubmit)="proceedToNextStep()">
+  <mat-form-field class="full-width">
+    <mat-label>Select city</mat-label>
+    <input type="text" matInput formControlName="cityInput" [matAutocomplete]="auto" aria-label="Search for cities">
 
-  <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onCitySelect($event.option.value)">
-    @if (isLoading) {
-    <mat-option disabled>
-      Loading...
-    </mat-option>
+    <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onCitySelect($event.option.value)">
+      @if (isLoading) {
+      <mat-option disabled>Loading...</mat-option>
+      }
+
+      @for (city of citySuggestions; track city.name) {
+      <mat-option [value]="city.name">
+        {{ city.name }} - {{ city.country }}
+      </mat-option>
+      }
+
+      @if (!isLoading && citySuggestions.length === 0 && (cityControl.value?.length ?? 0) > 2) {
+      <mat-option disabled>No cities found</mat-option>
+      }
+    </mat-autocomplete>
+  </mat-form-field>
+
+  <mat-chip-listbox>
+    @for (city of selectedCities; track city) {
+    <mat-chip [removable]="true" (removed)="removeCity(city)">
+      {{ city }}
+      <mat-icon matChipRemove>cancel</mat-icon>
+    </mat-chip>
     }
+  </mat-chip-listbox>
 
-    @for (city of citySuggestions; track city.name) {
-    <mat-option [value]="city.name">
-      {{ city.name }} - {{ city.country }}
-    </mat-option>
-    }
-
-    @if (!isLoading && citySuggestions.length === 0 && (cityControl.value?.length ?? 0) > 2) {
-    <mat-option disabled>No cities found</mat-option>
-    }
-  </mat-autocomplete>
-</mat-form-field>
-
-<mat-chip-listbox>
-  @for (city of selectedCities; track city) {
-  <mat-chip [removable]="true" (removed)="removeCity(city)">
-    {{ city }}
-    <mat-icon matChipRemove>cancel</mat-icon>
-  </mat-chip>
+  @if(formSubmitted && selectedCities.length === 0) {
+  <div class="form-error">
+    Please select at least one city before proceeding.
+  </div>
   }
-</mat-chip-listbox>
+
+  <button mat-raised-button color="primary" type="submit">
+    Next
+  </button>
+</form>
