@@ -21,15 +21,22 @@ mat-chip-listbox {
   gap: 8px;
 }
 
-.city-selection-error {
+.form-error {
   color: #d32f2f;
-  font-size: 0.875rem;
-  font-weight: 500;
+  font-size: 0.9rem;
+  margin-top: 8px;
 }
 
 button {
   align-self: flex-end;
   margin-top: 16px;
+}
+
+.metrics-selection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 0;
 }
 
 @media (max-width: 600px) {

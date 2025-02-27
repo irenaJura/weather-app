@@ -24,7 +24,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { City } from '../../models/city.model';
 import { MatButtonModule } from '@angular/material/button';
-
+import { MatCheckboxModule } from '@angular/material/checkbox';
 @Component({
   selector: 'multi-step-form',
   standalone: true,
@@ -39,6 +39,7 @@ import { MatButtonModule } from '@angular/material/button';
     MatChipsModule,
     MatIconModule,
     MatButtonModule,
+    MatCheckboxModule,
   ],
   styleUrls: ['./multi-step-form.component.scss'],
 })
@@ -46,10 +47,18 @@ export class MultiStepFormComponent {
   cityForm = new FormGroup({
     cityInput: new FormControl(''),
   });
+  metricsForm = new FormGroup({
+    temperature: new FormControl(false),
+    humidity: new FormControl(false),
+    windSpeed: new FormControl(false),
+  });
   citySuggestions: City[] = [];
   selectedCities: string[] = [];
+  selectedMetrics: string[] = [];
   isLoading = false;
   formSubmitted = false;
+  metricsFormSubmitted = false;
+  step = 1;
 
   get cityControl(): FormControl {
     return this.cityForm.get('cityInput') as FormControl;
@@ -83,6 +92,18 @@ export class MultiStepFormComponent {
         takeUntilDestroyed(this.destroyRef)
       )
       .subscribe();
+
+    this.metricsForm.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        if (this.metricsFormSubmitted) {
+          const selected = this.getSelectedMetrics();
+
+          if (selected.length > 0) {
+            this.metricsFormSubmitted = false;
+          }
+        }
+      });
   }
 
   onCitySelect(city: string): void {
@@ -97,7 +118,7 @@ export class MultiStepFormComponent {
     this.selectedCities = this.selectedCities.filter((c) => c !== city);
   }
 
-  proceedToNextStep(): void {
+  proceedToStepTwo(): void {
     this.formSubmitted = true;
 
     if (this.selectedCities.length === 0) {
@@ -105,8 +126,28 @@ export class MultiStepFormComponent {
     }
 
     if (this.cityForm.valid) {
-      console.log('Selected cities:', this.selectedCities);
-      // Proceed to next step
+      this.step = 2;
+    }
+  }
+
+  getSelectedMetrics(): string[] {
+    return (
+      Object.keys(this.metricsForm.value) as Array<
+        keyof typeof this.metricsForm.value
+      >
+    ).filter((key) => this.metricsForm.value[key]);
+  }
+
+  proceedToStepThree(): void {
+    this.metricsFormSubmitted = true;
+    this.selectedMetrics = this.getSelectedMetrics();
+
+    if (this.selectedMetrics.length === 0) {
+      return;
+    }
+
+    if (this.metricsForm.valid) {
+      this.step = 3;
     }
   }
 }

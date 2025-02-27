@@ -1,4 +1,5 @@
-<form [formGroup]="cityForm" (ngSubmit)="proceedToNextStep()">
+@if(step === 1) {
+<form [formGroup]="cityForm" (ngSubmit)="proceedToStepTwo()">
   <mat-form-field class="full-width">
     <mat-label>Select city</mat-label>
     <input type="text" matInput formControlName="cityInput" [matAutocomplete]="auto" aria-label="Search for cities">
@@ -39,3 +40,24 @@
     Next
   </button>
 </form>
+}
+
+@if(step === 2) {
+<form [formGroup]="metricsForm" (ngSubmit)="proceedToStepThree()">
+  <h3>Select Metrics to Display</h3>
+
+  <div class="metrics-selection">
+    <mat-checkbox formControlName="temperature">Temperature</mat-checkbox>
+    <mat-checkbox formControlName="humidity">Humidity</mat-checkbox>
+    <mat-checkbox formControlName="windSpeed">Wind Speed</mat-checkbox>
+  </div>
+
+  @if(metricsFormSubmitted && selectedMetrics.length === 0) {
+  <div class="form-error">
+    Please select at least one metric.
+  </div>
+  }
+
+  <button mat-raised-button color="primary">Next</button>
+</form>
+}
