@@ -97,3 +97,43 @@
   <button mat-raised-button color="primary" type="submit">Next</button>
 </form>
 }
+
+@if(step === 4) {
+<div class="confirmation-container">
+  <h2>Final Step: Confirmation</h2>
+
+  <div>
+    <h3>Selected Cities:</h3>
+    @if(selectedCities.length > 0) {
+    <ul>
+      @for(city of selectedCities; track city) {
+      <li>{{ city }}</li>
+      }
+    </ul>
+    }
+  </div>
+
+  <div>
+    <h3>Selected Metrics:</h3>
+    @if(selectedMetrics.length > 0) {
+    <ul>
+      @for(metric of selectedMetrics; track metric) {
+      <li>{{ metric }}</li>
+      }
+    </ul>
+    }
+  </div>
+
+  <div>
+    <h3>Layout: {{ selectedLayout }}</h3>
+    <h3>Chart Type: {{ selectedChartType }}</h3>
+  </div>
+
+  <div class="button-container">
+    <button mat-raised-button color="accent" class="go-back-btn" (click)="step = 3">Go Back</button>
+
+    <button mat-raised-button color="primary" class="confirm-btn" (click)="confirmSelections()">Confirm
+      Selections</button>
+  </div>
+</div>
+}

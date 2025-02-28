@@ -62,6 +62,8 @@ export class MultiStepFormComponent {
   citySuggestions: City[] = [];
   selectedCities: string[] = [];
   selectedMetrics: string[] = [];
+  selectedLayout: string | null = null;
+  selectedChartType: string | null = null;
   isLoading = false;
   formSubmitted = false;
   metricsFormSubmitted = false;
@@ -163,12 +165,23 @@ export class MultiStepFormComponent {
     this.displayOptionsFormSubmitted = true;
 
     const { layout, chartType } = this.displayOptionsForm.value;
+    this.selectedLayout = layout ?? null;
+    this.selectedChartType = chartType ?? null;
 
     if (!layout || !chartType) {
       return;
     }
 
-    console.log('Selected Layout:', layout);
-    console.log('Selected Chart Type:', chartType);
+    this.step = 4;
+  }
+
+  confirmSelections(): void {
+    console.log('Final Selections:');
+    console.log('Cities:', this.selectedCities);
+    console.log('Metrics:', this.selectedMetrics);
+    console.log('Layout:', this.selectedLayout);
+    console.log('Chart Type:', this.selectedChartType);
+
+    // TODO: Update & navigate to dashboard
   }
 }
