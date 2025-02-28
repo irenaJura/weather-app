@@ -25,6 +25,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { City } from '../../models/city.model';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatRadioModule } from '@angular/material/radio';
 @Component({
   selector: 'multi-step-form',
   standalone: true,
@@ -40,6 +41,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
     MatIconModule,
     MatButtonModule,
     MatCheckboxModule,
+    MatRadioModule,
   ],
   styleUrls: ['./multi-step-form.component.scss'],
 })
@@ -52,12 +54,18 @@ export class MultiStepFormComponent {
     humidity: new FormControl(false),
     windSpeed: new FormControl(false),
   });
+  displayOptionsForm = new FormGroup({
+    layout: new FormControl<string | null>(null),
+    chartType: new FormControl<string | null>(null),
+  });
+
   citySuggestions: City[] = [];
   selectedCities: string[] = [];
   selectedMetrics: string[] = [];
   isLoading = false;
   formSubmitted = false;
   metricsFormSubmitted = false;
+  displayOptionsFormSubmitted = false;
   step = 1;
 
   get cityControl(): FormControl {
@@ -149,5 +157,18 @@ export class MultiStepFormComponent {
     if (this.metricsForm.valid) {
       this.step = 3;
     }
+  }
+
+  proceedToFinalStep(): void {
+    this.displayOptionsFormSubmitted = true;
+
+    const { layout, chartType } = this.displayOptionsForm.value;
+
+    if (!layout || !chartType) {
+      return;
+    }
+
+    console.log('Selected Layout:', layout);
+    console.log('Selected Chart Type:', chartType);
   }
 }

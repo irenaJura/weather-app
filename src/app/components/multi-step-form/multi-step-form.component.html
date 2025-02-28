@@ -61,3 +61,39 @@
   <button mat-raised-button color="primary">Next</button>
 </form>
 }
+
+@if(step === 3) {
+<form [formGroup]="displayOptionsForm" (ngSubmit)="proceedToFinalStep()">
+  <h3>Display Options</h3>
+
+  <div class="option-group">
+    <h4>Choose Layout</h4>
+    <mat-radio-group formControlName="layout">
+      <mat-radio-button value="table">Table View</mat-radio-button>
+      <mat-radio-button value="card">Card View</mat-radio-button>
+    </mat-radio-group>
+
+    @if(displayOptionsFormSubmitted && !displayOptionsForm.value.layout) {
+    <div class="form-error">
+      Please select a layout.
+    </div>
+    }
+  </div>
+
+  <div class="option-group">
+    <h4>Choose Chart Type</h4>
+    <mat-radio-group formControlName="chartType">
+      <mat-radio-button value="line">Line Chart</mat-radio-button>
+      <mat-radio-button value="bar">Bar Chart</mat-radio-button>
+    </mat-radio-group>
+
+    @if(displayOptionsFormSubmitted && !displayOptionsForm.value.chartType) {
+    <div class="form-error">
+      Please select a chart type.
+    </div>
+    }
+  </div>
+
+  <button mat-raised-button color="primary" type="submit">Next</button>
+</form>
+}
