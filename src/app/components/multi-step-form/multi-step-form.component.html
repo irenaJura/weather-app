@@ -58,7 +58,10 @@
   </div>
   }
 
-  <button mat-raised-button color="primary">Next</button>
+  <div class="button-container">
+    <button mat-raised-button (click)="step = 1">Go Back</button>
+    <button mat-raised-button color="primary" type="submit">Next</button>
+  </div>
 </form>
 }
 
@@ -94,7 +97,10 @@
     }
   </div>
 
-  <button mat-raised-button color="primary" type="submit">Next</button>
+  <div class="button-container">
+    <button mat-raised-button (click)="step = 2">Go Back</button>
+    <button mat-raised-button color="primary" type="submit">Next</button>
+  </div>
 </form>
 }
 
@@ -130,7 +136,7 @@
   </div>
 
   <div class="button-container">
-    <button mat-raised-button color="accent" class="go-back-btn" (click)="step = 3">Go Back</button>
+    <button mat-raised-button (click)="step = 3">Go Back</button>
 
     <button mat-raised-button color="primary" class="confirm-btn" (click)="confirmSelections()">Confirm
       Selections</button>
