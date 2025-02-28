@@ -1,6 +1,7 @@
 import {
   ChangeDetectorRef,
   Component,
+  DestroyRef,
   inject,
   OnInit,
   ViewChild,
@@ -18,6 +19,11 @@ import { MatSort } from '@angular/material/sort';
 import { MatSortModule } from '@angular/material/sort';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartDataset } from 'chart.js';
+import {
+  SelectedCityData,
+  WeatherDataTransferService,
+} from '../../services/weather-data-transfer.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-dashboard',
@@ -37,7 +43,10 @@ import { ChartDataset } from 'chart.js';
 })
 export class DashboardComponent implements OnInit {
   private weatherService = inject(WeatherService);
+  private weatherDataTransferService = inject(WeatherDataTransferService);
   private changeDetectorRef = inject(ChangeDetectorRef);
+  private destroyRef = inject(DestroyRef);
+
   displayedColumns: string[] = ['city', 'temp', 'humidity', 'condition'];
 
   testWeatherData: {
@@ -45,6 +54,9 @@ export class DashboardComponent implements OnInit {
     lat: number;
     lon: number;
     data?: WeatherData;
+    metrics?: string[];
+    layout?: string;
+    chartType?: string;
   }[] = [
     { city: 'New York', lat: 40.7128, lon: -74.006 },
     { city: 'London', lat: 51.5074, lon: -0.1278 },
@@ -73,6 +85,14 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit() {
     this.fetchWeatherData();
+
+    this.weatherDataTransferService.newCity$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((cityData) => {
+        if (cityData) {
+          this.addCityWithWeather(cityData);
+        }
+      });
   }
 
   fetchWeatherData() {
@@ -144,6 +164,34 @@ export class DashboardComponent implements OnInit {
         fill: true,
       },
     ];
+  }
+
+  addCityWithWeather(cityData: SelectedCityData) {
+    const { city, metrics, layout, chartType } = cityData;
+
+    this.weatherService
+      .getWeatherData(city.lat, city.lon)
+      .subscribe((weatherData) => {
+        const newCity = {
+          city: city.name,
+          lat: city.lat,
+          lon: city.lon,
+          data: weatherData,
+          metrics,
+          layout,
+          chartType,
+        };
+
+        this.testWeatherData = [...this.testWeatherData, newCity];
+        this.updateTableData();
+
+        console.log('New city added:', newCity);
+      });
+  }
+
+  private updateTableData() {
+    this.dataSource.data = this.testWeatherData;
+    this.dataSource.sort = this.sort;
   }
 
   private initSort() {

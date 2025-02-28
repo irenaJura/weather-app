@@ -26,6 +26,11 @@ import { City } from '../../models/city.model';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatRadioModule } from '@angular/material/radio';
+import {
+  SelectedCityData,
+  WeatherDataTransferService,
+} from '../../services/weather-data-transfer.service';
+import { Router } from '@angular/router';
 @Component({
   selector: 'multi-step-form',
   standalone: true,
@@ -75,6 +80,8 @@ export class MultiStepFormComponent {
   }
 
   private weatherService = inject(WeatherService);
+  private weatherDataTransferService = inject(WeatherDataTransferService);
+  private router = inject(Router);
   private destroyRef = inject(DestroyRef);
 
   ngOnInit(): void {
@@ -182,12 +189,17 @@ export class MultiStepFormComponent {
   }
 
   confirmSelections(): void {
-    console.log('Final Selections:');
-    console.log('Cities:', this.selectedCities);
-    console.log('Metrics:', this.selectedMetrics);
-    console.log('Layout:', this.selectedLayout);
-    console.log('Chart Type:', this.selectedChartType);
+    if (this.selectedCities.length > 0) {
+      const cityData: SelectedCityData = {
+        city: this.selectedCities[0], // Only supporting 1 city at a time for now
+        metrics: this.selectedMetrics,
+        layout: this.selectedLayout!,
+        chartType: this.selectedChartType!,
+      };
 
-    // TODO: Update & navigate to dashboard
+      this.weatherDataTransferService.sendNewCityData(cityData);
+    }
+
+    this.router.navigate(['dashboard']);
   }
 }
