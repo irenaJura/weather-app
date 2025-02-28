@@ -10,7 +10,7 @@
       }
 
       @for (city of citySuggestions; track city.name) {
-      <mat-option [value]="city.name">
+      <mat-option [value]="city">
         {{ city.name }} - {{ city.country }}
       </mat-option>
       }
@@ -22,9 +22,9 @@
   </mat-form-field>
 
   <mat-chip-listbox>
-    @for (city of selectedCities; track city) {
+    @for (city of selectedCities; track city + city.country) {
     <mat-chip [removable]="true" (removed)="removeCity(city)">
-      {{ city }}
+      {{ city.name }} - {{ city.country }}
       <mat-icon matChipRemove>cancel</mat-icon>
     </mat-chip>
     }
@@ -112,8 +112,8 @@
     <h3>Selected Cities:</h3>
     @if(selectedCities.length > 0) {
     <ul>
-      @for(city of selectedCities; track city) {
-      <li>{{ city }}</li>
+      @for(city of selectedCities; track city.name + city.country) {
+      <li>{{ city.name }} - {{ city.country }}</li>
       }
     </ul>
     }

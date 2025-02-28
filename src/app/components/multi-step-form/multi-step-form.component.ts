@@ -60,7 +60,7 @@ export class MultiStepFormComponent {
   });
 
   citySuggestions: City[] = [];
-  selectedCities: string[] = [];
+  selectedCities: City[] = [];
   selectedMetrics: string[] = [];
   selectedLayout: string | null = null;
   selectedChartType: string | null = null;
@@ -116,16 +116,22 @@ export class MultiStepFormComponent {
       });
   }
 
-  onCitySelect(city: string): void {
-    if (!this.selectedCities.includes(city)) {
+  onCitySelect(city: City): void {
+    if (
+      !this.selectedCities.some(
+        (c) => c.name === city.name && c.country === city.country
+      )
+    ) {
       this.selectedCities = [...this.selectedCities, city];
       this.cityControl.setValue('');
       this.citySuggestions = [];
     }
   }
 
-  removeCity(city: string): void {
-    this.selectedCities = this.selectedCities.filter((c) => c !== city);
+  removeCity(city: City): void {
+    this.selectedCities = this.selectedCities.filter(
+      (c) => c.name !== city.name && c.country !== city.country
+    );
   }
 
   proceedToStepTwo(): void {
