@@ -18,7 +18,7 @@ import { WeatherTableData } from '../../models/weather-table-data.interface';
 import { MatSort } from '@angular/material/sort';
 import { MatSortModule } from '@angular/material/sort';
 import { BaseChartDirective } from 'ng2-charts';
-import { ChartDataset } from 'chart.js';
+import { ChartDataset, ChartType } from 'chart.js';
 import {
   SelectedCityData,
   WeatherDataTransferService,
@@ -82,6 +82,7 @@ export class DashboardComponent implements OnInit {
   chartLegend = true;
   chartVisible = false;
   selectedCity = '';
+  selectedChartType!: ChartType;
 
   ngOnInit() {
     this.fetchWeatherData();
@@ -184,6 +185,7 @@ export class DashboardComponent implements OnInit {
 
         this.testWeatherData = [...this.testWeatherData, newCity];
         this.updateTableData();
+        this.selectedChartType = chartType as ChartType;
 
         console.log('New city added:', newCity);
       });

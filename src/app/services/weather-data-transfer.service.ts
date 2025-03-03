@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { City } from '../models/city.model';
+import { ChartType } from 'chart.js';
 
 export interface SelectedCityData {
   city: City;
   metrics: string[];
   layout: string;
-  chartType: string;
+  chartType: ChartType;
 }
 
 @Injectable({ providedIn: 'root' })

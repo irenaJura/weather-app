@@ -31,6 +31,7 @@ import {
   WeatherDataTransferService,
 } from '../../services/weather-data-transfer.service';
 import { Router } from '@angular/router';
+import { ChartType } from 'chart.js';
 @Component({
   selector: 'multi-step-form',
   standalone: true,
@@ -61,14 +62,14 @@ export class MultiStepFormComponent {
   });
   displayOptionsForm = new FormGroup({
     layout: new FormControl<string | null>(null),
-    chartType: new FormControl<string | null>(null),
+    chartType: new FormControl<ChartType | null>(null),
   });
 
   citySuggestions: City[] = [];
   selectedCities: City[] = [];
   selectedMetrics: string[] = [];
   selectedLayout: string | null = null;
-  selectedChartType: string | null = null;
+  selectedChartType: ChartType | null = null;
   isLoading = false;
   formSubmitted = false;
   metricsFormSubmitted = false;
