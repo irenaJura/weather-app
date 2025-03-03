@@ -14,7 +14,6 @@ import { WeatherService } from '../../services/weather.service';
 import { CommonModule } from '@angular/common';
 import { catchError, EMPTY, forkJoin, tap } from 'rxjs';
 import { MatInputModule } from '@angular/material/input';
-import { WeatherTableData } from '../../models/weather-table-data.interface';
 import { MatSort } from '@angular/material/sort';
 import { MatSortModule } from '@angular/material/sort';
 import { BaseChartDirective } from 'ng2-charts';
@@ -24,6 +23,11 @@ import {
   WeatherDataTransferService,
 } from '../../services/weather-data-transfer.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import {
+  ColumnConfig,
+  WeatherTableRow,
+} from '../../models/table-row-data.model';
+import { DashboardData } from '../../models/dashboard-data.interface';
 
 @Component({
   selector: 'app-dashboard',
@@ -47,26 +51,26 @@ export class DashboardComponent implements OnInit {
   private changeDetectorRef = inject(ChangeDetectorRef);
   private destroyRef = inject(DestroyRef);
 
-  displayedColumns: string[] = ['city', 'temp', 'humidity', 'condition'];
+  displayedColumns: ColumnConfig[] = [
+    { id: 'city', label: 'City' },
+    { id: 'temp', label: 'Temperature (°C)' },
+    { id: 'humidity', label: 'Humidity (%)' },
+    { id: 'windSpeed', label: 'Wind Speed (km/h)' },
+    { id: 'condition', label: 'Condition' },
+  ];
 
-  testWeatherData: {
-    city: string;
-    lat: number;
-    lon: number;
-    data?: WeatherData;
-    metrics?: string[];
-    layout?: string;
-    chartType?: string;
-  }[] = [
+  displayedColumnIds = this.displayedColumns.map((column) => column.id);
+
+  private cityDataMap = new Map<string, WeatherData>();
+
+  testWeatherData: DashboardData[] = [
     { city: 'New York', lat: 40.7128, lon: -74.006 },
     { city: 'London', lat: 51.5074, lon: -0.1278 },
     { city: 'Tokyo', lat: 35.682839, lon: 139.759455 },
   ];
 
   isLoading = false;
-
-  dataSource = new MatTableDataSource<WeatherTableData>([]);
-
+  dataSource = new MatTableDataSource<WeatherTableRow>([]);
   @ViewChild(MatSort) sort!: MatSort;
 
   chartData: ChartDataset<'line'>[] = [];
@@ -82,7 +86,7 @@ export class DashboardComponent implements OnInit {
   chartLegend = true;
   chartVisible = false;
   selectedCity = '';
-  selectedChartType!: ChartType;
+  selectedChartType: ChartType = 'line';
 
   ngOnInit() {
     this.fetchWeatherData();
@@ -117,15 +121,12 @@ export class DashboardComponent implements OnInit {
         })
       )
       .subscribe((results) => {
-        results.forEach(
-          (data, index) => (this.testWeatherData[index].data = data)
-        );
+        results.forEach((data, index) => {
+          this.testWeatherData[index].data = data;
+          this.cityDataMap.set(this.testWeatherData[index].city, data);
+        });
         this.isLoading = false;
-        this.dataSource.data = this.testWeatherData;
-        // ensure table got new data before sorting
-        this.changeDetectorRef.detectChanges();
-        this.dataSource.sort = this.sort;
-        this.initSort();
+        this.updateTableData();
       });
   }
 
@@ -134,17 +135,16 @@ export class DashboardComponent implements OnInit {
     this.dataSource.filter = filterValue.trim().toLowerCase();
   }
 
-  onCityClick(cityData: any): void {
+  onCityClick(row: WeatherTableRow): void {
     this.chartVisible = true;
 
-    if (this.selectedCity === cityData.city) {
+    if (this.selectedCity === row.city) {
       return;
     }
 
-    this.selectedCity = cityData.city;
-    const weather = cityData.data as WeatherData;
-
-    const dailyData = weather.daily;
+    this.selectedCity = row.city;
+    const weather = this.cityDataMap.get(row.city);
+    const dailyData = weather!.daily;
 
     this.chartLabels = dailyData.map((day) => {
       const date = new Date(day.dt * 1000);
@@ -184,35 +184,56 @@ export class DashboardComponent implements OnInit {
         };
 
         this.testWeatherData = [...this.testWeatherData, newCity];
-        this.updateTableData();
-        this.selectedChartType = chartType as ChartType;
+        this.cityDataMap.set(city.name, weatherData);
 
-        console.log('New city added:', newCity);
+        this.updateTableData();
+        this.updateDisplayedColumns(metrics);
+        this.selectedChartType = chartType as ChartType;
       });
   }
 
   private updateTableData() {
-    this.dataSource.data = this.testWeatherData;
+    this.dataSource.data = this.testWeatherData.map((cityData) => ({
+      city: cityData.city,
+      temp: cityData.data?.current?.temp
+        ? Math.round(cityData.data.current.temp)
+        : undefined,
+      humidity: cityData.data?.current?.humidity
+        ? Math.round(cityData.data.current.humidity)
+        : undefined,
+      windSpeed: cityData.data?.current?.wind_speed
+        ? Math.round(cityData.data.current.wind_speed)
+        : undefined,
+      condition: cityData.data?.current?.weather[0]?.description ?? undefined,
+    }));
+    // ensure table got new data before sorting
+    this.changeDetectorRef.detectChanges();
     this.dataSource.sort = this.sort;
+    this.initSort();
+  }
+
+  updateDisplayedColumns(selectedMetrics: string[]) {
+    const metricColumnMap: Record<string, ColumnConfig> = {
+      temperature: { id: 'temp', label: 'Temperature (°C)' },
+      humidity: { id: 'humidity', label: 'Humidity (%)' },
+      windSpeed: { id: 'windSpeed', label: 'Wind Speed (km/h)' },
+    };
+
+    this.displayedColumns = [
+      { id: 'city', label: 'City' },
+      ...selectedMetrics.map(
+        (metric) => metricColumnMap[metric] ?? { id: metric, label: metric }
+      ),
+      { id: 'condition', label: 'Condition' },
+    ];
   }
 
   private initSort() {
     this.dataSource.sortingDataAccessor = (
-      item: WeatherTableData,
+      row: WeatherTableRow,
       property: string
     ) => {
-      switch (property) {
-        case 'city':
-          return item.city;
-        case 'temp':
-          return item.data?.current.temp || 0;
-        case 'humidity':
-          return item.data?.current.humidity || 0;
-        case 'condition':
-          return item.data?.current.weather[0]?.description || '';
-        default:
-          return '';
-      }
+      return row[property as keyof WeatherTableRow] ?? '';
     };
   }
 }

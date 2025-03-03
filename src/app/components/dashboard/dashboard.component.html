@@ -14,57 +14,28 @@
   @if (dataSource.filteredData.length === 0) {
   <div class="no-results">No results found</div>
   } @else {
-  <table mat-table [dataSource]="dataSource" matSort>
+  <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8">
 
-    <!-- City Column -->
-    <ng-container matColumnDef="city">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header> City </th>
-      <td mat-cell *matCellDef="let element"> {{ element.city }} </td>
-    </ng-container>
-
-    <!-- Temperature Column -->
-    <ng-container matColumnDef="temp">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header> Temperature (°C) </th>
-      <td mat-cell *matCellDef="let element">
-        @if (element.data) {
-        {{ element.data.current.temp | number: '1.0-0' }}
-        } @else {
-        --
-        }
+    @for(column of displayedColumns; track column) {
+    <ng-container [matColumnDef]="column.id">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>
+        {{ column.label }}
+      </th>
+      <td mat-cell *matCellDef="let row">
+        {{ row[column.id] ?? '--' }}
       </td>
     </ng-container>
+    }
 
-    <!-- Humidity Column -->
-    <ng-container matColumnDef="humidity">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header> Humidity (%) </th>
-      <td mat-cell *matCellDef="let element">
-        @if (element.data) {
-        {{ element.data.current.humidity }}
-        } @else {
-        --
-        }
-      </td>
-    </ng-container>
-
-    <!-- Condition Column -->
-    <ng-container matColumnDef="condition">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header> Condition </th>
-      <td mat-cell *matCellDef="let element">
-        @if (element.data) {
-        {{ element.data.current.weather[0]?.description }}
-        } @else {
-        --
-        }
-      </td>
-    </ng-container>
-    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    <tr mat-row *matRowDef="let row; columns: displayedColumns" (click)="onCityClick(row)" class="clickable-row">
+    <tr mat-header-row *matHeaderRowDef="displayedColumnIds"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumnIds" (click)="onCityClick(row)" class="clickable-row">
     </tr>
+
   </table>
   }
   }
 
-  @if(chartVisible) {
+  @if (chartVisible) {
   <div class="chart-container">
     <canvas baseChart [datasets]="chartData" [labels]="chartLabels" [options]="chartOptions" [legend]="chartLegend"
       [type]="selectedChartType">
