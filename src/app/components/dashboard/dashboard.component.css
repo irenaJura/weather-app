@@ -34,3 +34,29 @@ mat-form-field {
 .clickable-row:hover {
   background-color: rgba(0, 0, 0, 0.1);
 }
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 16px;
+  margin: 20px 0;
+}
+
+.city-card {
+  cursor: pointer;
+  transition: box-shadow 0.3s ease;
+}
+
+.city-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.city-card mat-card-title {
+  font-size: 1.2em;
+  margin-bottom: 8px;
+}
+
+.city-card mat-card-content {
+  font-size: 0.9em;
+  line-height: 1.5;
+}

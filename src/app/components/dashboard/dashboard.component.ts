@@ -87,6 +87,7 @@ export class DashboardComponent implements OnInit {
   chartVisible = false;
   selectedCity = '';
   selectedChartType: ChartType = 'line';
+  selectedLayout = 'table';
 
   ngOnInit() {
     this.fetchWeatherData();
@@ -187,8 +188,9 @@ export class DashboardComponent implements OnInit {
         this.cityDataMap.set(city.name, weatherData);
 
         this.updateTableData();
-        this.updateDisplayedColumns(metrics);
+        this.updatedisplayedWeatherInfo(metrics);
         this.selectedChartType = chartType as ChartType;
+        this.selectedLayout = cityData.layout ?? 'table';
       });
   }
 
@@ -212,7 +214,7 @@ export class DashboardComponent implements OnInit {
     this.initSort();
   }
 
-  updateDisplayedColumns(selectedMetrics: string[]) {
+  updatedisplayedWeatherInfo(selectedMetrics: string[]) {
     const metricColumnMap: Record<string, ColumnConfig> = {
       temperature: { id: 'temp', label: 'Temperature (°C)' },
       humidity: { id: 'humidity', label: 'Humidity (%)' },

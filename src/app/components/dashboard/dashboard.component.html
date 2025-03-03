@@ -14,6 +14,8 @@
   @if (dataSource.filteredData.length === 0) {
   <div class="no-results">No results found</div>
   } @else {
+
+  @if (selectedLayout === 'table') {
   <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8">
 
     @for(column of displayedColumns; track column) {
@@ -32,6 +34,22 @@
     </tr>
 
   </table>
+  } @else if (selectedLayout === 'card') {
+  <div class="card-grid">
+    @for (card of dataSource.filteredData; track card.city) {
+    <mat-card class="city-card" (click)="onCityClick(card)">
+      <mat-card-title>{{ card.city }}</mat-card-title>
+      <mat-card-content>
+        @for (column of displayedColumns; track column.id) {
+        @if (column.id !== 'city') {
+        <p><strong>{{ column.label }}:</strong> {{ card[column.id] ?? '--' }}</p>
+        }
+        }
+      </mat-card-content>
+    </mat-card>
+    }
+  </div>
+  }
   }
   }
 
