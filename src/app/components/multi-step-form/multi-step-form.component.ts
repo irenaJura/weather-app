@@ -192,7 +192,7 @@ export class MultiStepFormComponent {
   confirmSelections(): void {
     if (this.selectedCities.length > 0) {
       const cityData: SelectedCityData = {
-        city: this.selectedCities[0], // Only supporting 1 city at a time for now
+        cities: this.selectedCities,
         metrics: this.selectedMetrics,
         layout: this.selectedLayout!,
         chartType: this.selectedChartType!,

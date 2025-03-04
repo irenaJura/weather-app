@@ -4,7 +4,7 @@ import { City } from '../models/city.model';
 import { ChartType } from 'chart.js';
 
 export interface SelectedCityData {
-  city: City;
+  cities: City[];
   metrics: string[];
   layout: string;
   chartType: ChartType;

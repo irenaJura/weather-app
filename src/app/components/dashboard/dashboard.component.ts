@@ -12,7 +12,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { WeatherData } from '../../models/weather-data.model';
 import { WeatherService } from '../../services/weather.service';
 import { CommonModule } from '@angular/common';
-import { catchError, EMPTY, forkJoin, tap } from 'rxjs';
+import { catchError, EMPTY, forkJoin, map, tap } from 'rxjs';
 import { MatInputModule } from '@angular/material/input';
 import { MatSort } from '@angular/material/sort';
 import { MatSortModule } from '@angular/material/sort';
@@ -168,12 +168,23 @@ export class DashboardComponent implements OnInit {
     ];
   }
 
-  addCityWithWeather(cityData: SelectedCityData) {
-    const { city, metrics, layout, chartType } = cityData;
+  addCityWithWeather(data: SelectedCityData): void {
+    const { cities, metrics, layout, chartType } = data;
 
-    this.weatherService
-      .getWeatherData(city.lat, city.lon)
-      .subscribe((weatherData) => {
+    this.selectedChartType = chartType;
+    this.selectedLayout = layout;
+
+    const requests = cities.map((city) =>
+      this.weatherService.getWeatherData(city.lat, city.lon).pipe(
+        map((weatherData) => ({
+          city,
+          weatherData,
+        }))
+      )
+    );
+
+    forkJoin(requests).subscribe((results) => {
+      results.forEach(({ city, weatherData }) => {
         const newCity = {
           city: city.name,
           lat: city.lat,
@@ -186,12 +197,11 @@ export class DashboardComponent implements OnInit {
 
         this.testWeatherData = [...this.testWeatherData, newCity];
         this.cityDataMap.set(city.name, weatherData);
-
-        this.updateTableData();
-        this.updatedisplayedWeatherInfo(metrics);
-        this.selectedChartType = chartType as ChartType;
-        this.selectedLayout = cityData.layout ?? 'table';
       });
+
+      this.updateTableData();
+      this.updateDisplayedWeatherInfo(metrics);
+    });
   }
 
   private updateTableData() {
@@ -214,7 +224,7 @@ export class DashboardComponent implements OnInit {
     this.initSort();
   }
 
-  updatedisplayedWeatherInfo(selectedMetrics: string[]) {
+  updateDisplayedWeatherInfo(selectedMetrics: string[]) {
     const metricColumnMap: Record<string, ColumnConfig> = {
       temperature: { id: 'temp', label: 'Temperature (°C)' },
       humidity: { id: 'humidity', label: 'Humidity (%)' },
