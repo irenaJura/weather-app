@@ -238,6 +238,8 @@ export class DashboardComponent implements OnInit {
       ),
       { id: 'condition', label: 'Condition' },
     ];
+
+    this.displayedColumnIds = this.displayedColumns.map((column) => column.id);
   }
 
   private initSort() {
