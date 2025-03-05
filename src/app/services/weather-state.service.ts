@@ -30,6 +30,7 @@ export class WeatherStateService {
       (city) => city.city !== cityName
     );
     this.citiesSubject.next(updatedCities);
+    this.saveToStorage(updatedCities);
   }
 
   private saveToStorage(cities: DashboardData[]): void {
