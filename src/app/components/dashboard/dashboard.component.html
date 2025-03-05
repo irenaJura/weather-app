@@ -24,33 +24,46 @@
 
   @if (selectedLayout === 'table') {
   <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8">
+
     @for (column of displayedColumns; track column) {
     <ng-container [matColumnDef]="column.id">
+
       <th mat-header-cell *matHeaderCellDef mat-sort-header>
         {{ column.label }}
       </th>
+
       <td mat-cell *matCellDef="let row">
+        @if (column.id === 'actions') {
+        <mat-icon class="delete-icon" (click)="removeCity(row.city); $event.stopPropagation()">delete</mat-icon>
+        } @else {
         {{ row[column.id] ?? '--' }}
+        }
       </td>
+
     </ng-container>
     }
 
     <tr mat-header-row *matHeaderRowDef="displayedColumnIds"></tr>
     <tr mat-row *matRowDef="let row; columns: displayedColumnIds" (click)="onCityClick(row)" class="clickable-row">
     </tr>
+
   </table>
   }
+
 
   @else if (selectedLayout === 'card') {
   <div class="card-grid">
     @for (card of dataSource.filteredData; track card.city) {
     <mat-card class="city-card" (click)="onCityClick(card)">
-      <mat-card-title>{{ card.city }}</mat-card-title>
+      <mat-card-title>
+        {{ card.city }}
+      </mat-card-title>
       <mat-card-content>
         @for (column of displayedColumns; track column.id) {
-        @if (column.id !== 'city') {
+        @if (column.id !== 'city' && column.id !== 'actions') {
         <p><strong>{{ column.label }}:</strong> {{ card[column.id] ?? '--' }}</p>
         }
+        <mat-icon class="delete-icon" (click)="removeCity(card.city); $event.stopPropagation()">delete</mat-icon>
         }
       </mat-card-content>
     </mat-card>

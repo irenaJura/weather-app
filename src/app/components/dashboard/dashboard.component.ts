@@ -61,6 +61,7 @@ export class DashboardComponent implements OnInit {
     { id: 'humidity', label: 'Humidity (%)' },
     { id: 'windSpeed', label: 'Wind Speed (km/h)' },
     { id: 'condition', label: 'Condition' },
+    { id: 'actions', label: 'Actions' },
   ];
 
   displayedColumnIds = this.displayedColumns.map((column) => column.id);
@@ -205,6 +206,12 @@ export class DashboardComponent implements OnInit {
     });
   }
 
+  removeCity(cityName: string) {
+    if (confirm(`Are you sure you want to remove ${cityName}?`)) {
+      this.weatherStateService.removeCity(cityName);
+    }
+  }
+
   private updateTableData(cities: DashboardData[]) {
     this.dataSource.data = cities.map((cityData) => ({
       city: cityData.city,
@@ -225,7 +232,7 @@ export class DashboardComponent implements OnInit {
     this.initSort();
   }
 
-  updateDisplayedWeatherInfo(selectedMetrics: string[]) {
+  private updateDisplayedWeatherInfo(selectedMetrics: string[]) {
     const metricColumnMap: Record<string, ColumnConfig> = {
       temperature: { id: 'temp', label: 'Temperature (°C)' },
       humidity: { id: 'humidity', label: 'Humidity (%)' },
@@ -238,6 +245,7 @@ export class DashboardComponent implements OnInit {
         (metric) => metricColumnMap[metric] ?? { id: metric, label: metric }
       ),
       { id: 'condition', label: 'Condition' },
+      { id: 'actions', label: 'Action' },
     ];
 
     this.displayedColumnIds = this.displayedColumns.map((column) => column.id);

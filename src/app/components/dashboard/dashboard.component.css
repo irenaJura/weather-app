@@ -76,3 +76,15 @@ mat-form-field {
 .error-message mat-icon {
   color: #721c24;
 }
+
+.delete-icon {
+  font-size: 20px;
+  color: rgba(0, 0, 0, 0.6);
+  cursor: pointer;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.delete-icon:hover {
+  color: rgba(0, 0, 0, 0.85);
+  transform: scale(1.1);
+}

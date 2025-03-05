@@ -25,6 +25,13 @@ export class WeatherStateService {
     this.saveToStorage(updatedCities);
   }
 
+  removeCity(cityName: string) {
+    const updatedCities = this.citiesSubject.value.filter(
+      (city) => city.city !== cityName
+    );
+    this.citiesSubject.next(updatedCities);
+  }
+
   private saveToStorage(cities: DashboardData[]): void {
     localStorage.setItem(this.STORAGE_KEY, JSON.stringify(cities));
   }

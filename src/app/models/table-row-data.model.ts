@@ -4,6 +4,7 @@ export interface WeatherTableRow {
   humidity?: number;
   condition?: string;
   windSpeed?: number;
+  actions?: string;
 }
 
 export interface ColumnConfig {
