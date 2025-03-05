@@ -8,6 +8,18 @@
   </div>
   }
 
+  <mat-button-toggle-group [(value)]="selectedLayout" aria-label="View toggle">
+    <mat-button-toggle value="table">
+      <mat-icon>table_view</mat-icon>
+      Table
+    </mat-button-toggle>
+    <mat-button-toggle value="card">
+      <mat-icon>grid_view</mat-icon>
+      Card
+    </mat-button-toggle>
+  </mat-button-toggle-group>
+
+
   @if (isLoading) {
   <div class="loading-spinner">
     <mat-spinner></mat-spinner>
@@ -55,15 +67,15 @@
   <div class="card-grid">
     @for (card of dataSource.filteredData; track card.city) {
     <mat-card class="city-card" (click)="onCityClick(card)">
-      <mat-card-title>
-        {{ card.city }}
-      </mat-card-title>
+      <mat-card-header>
+        <mat-card-title>{{ card.city }}</mat-card-title>
+        <mat-icon class="delete-icon" (click)="removeCity(card.city); $event.stopPropagation()">delete</mat-icon>
+      </mat-card-header>
       <mat-card-content>
         @for (column of displayedColumns; track column.id) {
         @if (column.id !== 'city' && column.id !== 'actions') {
         <p><strong>{{ column.label }}:</strong> {{ card[column.id] ?? '--' }}</p>
         }
-        <mat-icon class="delete-icon" (click)="removeCity(card.city); $event.stopPropagation()">delete</mat-icon>
         }
       </mat-card-content>
     </mat-card>

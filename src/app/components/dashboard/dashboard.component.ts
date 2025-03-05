@@ -30,6 +30,7 @@ import {
 import { DashboardData } from '../../models/dashboard-data.interface';
 import { WeatherStateService } from '../../services/weather-state.service';
 import { MatIconModule } from '@angular/material/icon';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 
 @Component({
   selector: 'app-dashboard',
@@ -43,6 +44,7 @@ import { MatIconModule } from '@angular/material/icon';
     MatSortModule,
     BaseChartDirective,
     MatIconModule,
+    MatButtonToggleModule,
   ],
   providers: [WeatherService],
   templateUrl: './dashboard.component.html',

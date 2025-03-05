@@ -1,6 +1,7 @@
 mat-card {
   margin: 20px;
   padding: 20px;
+  position: relative;
 }
 
 table {
@@ -37,12 +38,13 @@ mat-form-field {
 
 .card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 16px;
-  margin: 20px 0;
 }
 
 .city-card {
+  position: relative;
+  overflow: hidden;
   cursor: pointer;
   transition: box-shadow 0.3s ease;
 }
@@ -51,30 +53,11 @@ mat-form-field {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-.city-card mat-card-title {
-  font-size: 1.2em;
-  margin-bottom: 8px;
-}
-
-.city-card mat-card-content {
-  font-size: 0.9em;
-  line-height: 1.5;
-}
-
-.error-message {
+mat-card-header {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 8px;
-  background-color: #f8d7da;
-  color: #721c24;
-  border: 1px solid #f5c6cb;
-  padding: 8px;
-  margin: 8px 0;
-  border-radius: 4px;
-}
-
-.error-message mat-icon {
-  color: #721c24;
+  padding: 16px;
 }
 
 .delete-icon {
@@ -85,6 +68,47 @@ mat-form-field {
 }
 
 .delete-icon:hover {
-  color: rgba(0, 0, 0, 0.85);
-  transform: scale(1.1);
+  color: rgba(244, 67, 54, 0.9);
+  transform: scale(1.2);
+}
+
+mat-card-content {
+  padding: 0 16px 16px;
+}
+
+p {
+  margin: 4px 0;
+}
+
+mat-button-toggle-group {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 10;
+  background: transparent;
+  border: none;
+  display: flex;
+  gap: 8px;
+}
+
+mat-button-toggle {
+  padding: 6px 10px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: white;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+mat-button-toggle.mat-button-toggle-checked {
+  background-color: #e0e0e0;
+  font-weight: bold;
+}
+
+mat-button-toggle:hover {
+  background-color: #f5f5f5;
 }
