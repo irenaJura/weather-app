@@ -138,7 +138,7 @@ export class MultiStepFormComponent {
 
   removeCity(city: City): void {
     this.selectedCities = this.selectedCities.filter(
-      (c) => c.name !== city.name && c.country !== city.country
+      (c) => !(c.name === city.name && c.country === city.country)
     );
   }
 

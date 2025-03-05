@@ -28,6 +28,7 @@ import {
   WeatherTableRow,
 } from '../../models/table-row-data.model';
 import { DashboardData } from '../../models/dashboard-data.interface';
+import { WeatherStateService } from '../../services/weather-state.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -48,6 +49,7 @@ import { DashboardData } from '../../models/dashboard-data.interface';
 export class DashboardComponent implements OnInit {
   private weatherService = inject(WeatherService);
   private weatherDataTransferService = inject(WeatherDataTransferService);
+  private weatherStateService = inject(WeatherStateService);
   private changeDetectorRef = inject(ChangeDetectorRef);
   private destroyRef = inject(DestroyRef);
 
@@ -90,7 +92,23 @@ export class DashboardComponent implements OnInit {
   selectedLayout = 'table';
 
   ngOnInit() {
-    this.fetchWeatherData();
+    this.weatherStateService.cities$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((cities) => {
+        this.cityDataMap.clear();
+        cities.forEach((city) => {
+          if (city.data) {
+            this.cityDataMap.set(city.city, city.data);
+          }
+        });
+        this.updateTableData(cities);
+
+        if (cities.length > 0) {
+          this.updateDisplayedWeatherInfo(cities[0].metrics!);
+          this.selectedChartType = cities[0].chartType!;
+          this.selectedLayout = cities[0].layout!;
+        }
+      });
 
     this.weatherDataTransferService.newCity$
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -98,36 +116,6 @@ export class DashboardComponent implements OnInit {
         if (cityData) {
           this.addCityWithWeather(cityData);
         }
-      });
-  }
-
-  fetchWeatherData() {
-    const requests = this.testWeatherData.map((cityData) =>
-      this.weatherService.getWeatherData(cityData.lat, cityData.lon).pipe(
-        tap(() => {
-          this.isLoading = true;
-        }),
-        catchError((error) => {
-          this.isLoading = false;
-          return EMPTY;
-        })
-      )
-    );
-
-    forkJoin(requests)
-      .pipe(
-        catchError((error) => {
-          this.isLoading = false;
-          return EMPTY;
-        })
-      )
-      .subscribe((results) => {
-        results.forEach((data, index) => {
-          this.testWeatherData[index].data = data;
-          this.cityDataMap.set(this.testWeatherData[index].city, data);
-        });
-        this.isLoading = false;
-        this.updateTableData();
       });
   }
 
@@ -171,9 +159,6 @@ export class DashboardComponent implements OnInit {
   addCityWithWeather(data: SelectedCityData): void {
     const { cities, metrics, layout, chartType } = data;
 
-    this.selectedChartType = chartType;
-    this.selectedLayout = layout;
-
     const requests = cities.map((city) =>
       this.weatherService.getWeatherData(city.lat, city.lon).pipe(
         map((weatherData) => ({
@@ -194,18 +179,18 @@ export class DashboardComponent implements OnInit {
           layout,
           chartType,
         };
-
-        this.testWeatherData = [...this.testWeatherData, newCity];
+        this.weatherStateService.addCity(newCity);
         this.cityDataMap.set(city.name, weatherData);
       });
 
-      this.updateTableData();
       this.updateDisplayedWeatherInfo(metrics);
+      this.selectedChartType = chartType;
+      this.selectedLayout = layout;
     });
   }
 
-  private updateTableData() {
-    this.dataSource.data = this.testWeatherData.map((cityData) => ({
+  private updateTableData(cities: DashboardData[]) {
+    this.dataSource.data = cities.map((cityData) => ({
       city: cityData.city,
       temp: cityData.data?.current?.temp
         ? Math.round(cityData.data.current.temp)
