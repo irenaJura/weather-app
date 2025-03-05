@@ -29,6 +29,7 @@ import {
 } from '../../models/table-row-data.model';
 import { DashboardData } from '../../models/dashboard-data.interface';
 import { WeatherStateService } from '../../services/weather-state.service';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-dashboard',
@@ -41,6 +42,7 @@ import { WeatherStateService } from '../../services/weather-state.service';
     MatInputModule,
     MatSortModule,
     BaseChartDirective,
+    MatIconModule,
   ],
   providers: [WeatherService],
   templateUrl: './dashboard.component.html',
@@ -72,6 +74,8 @@ export class DashboardComponent implements OnInit {
   ];
 
   isLoading = false;
+  errorMessage = '';
+
   dataSource = new MatTableDataSource<WeatherTableRow>([]);
   @ViewChild(MatSort) sort!: MatSort;
 
@@ -92,6 +96,7 @@ export class DashboardComponent implements OnInit {
   selectedLayout = 'table';
 
   ngOnInit() {
+    this.isLoading = true;
     this.weatherStateService.cities$
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((cities) => {
@@ -102,7 +107,7 @@ export class DashboardComponent implements OnInit {
           }
         });
         this.updateTableData(cities);
-
+        this.isLoading = false;
         if (cities.length > 0) {
           this.updateDisplayedWeatherInfo(cities[0].metrics!);
           this.selectedChartType = cities[0].chartType!;
@@ -157,6 +162,8 @@ export class DashboardComponent implements OnInit {
   }
 
   addCityWithWeather(data: SelectedCityData): void {
+    this.isLoading = true;
+
     const { cities, metrics, layout, chartType } = data;
 
     const requests = cities.map((city) =>
@@ -164,28 +171,37 @@ export class DashboardComponent implements OnInit {
         map((weatherData) => ({
           city,
           weatherData,
-        }))
+        })),
+        catchError((err) => {
+          this.errorMessage = `Failed to load weather data. Please try again.`;
+          return EMPTY;
+        })
       )
     );
 
-    forkJoin(requests).subscribe((results) => {
-      results.forEach(({ city, weatherData }) => {
-        const newCity = {
-          city: city.name,
-          lat: city.lat,
-          lon: city.lon,
-          data: weatherData,
-          metrics,
-          layout,
-          chartType,
-        };
-        this.weatherStateService.addCity(newCity);
-        this.cityDataMap.set(city.name, weatherData);
-      });
+    forkJoin(requests).subscribe({
+      next: (results) => {
+        results.forEach(({ city, weatherData }) => {
+          const newCity = {
+            city: city.name,
+            lat: city.lat,
+            lon: city.lon,
+            data: weatherData,
+            metrics,
+            layout,
+            chartType,
+          };
+          this.weatherStateService.addCity(newCity);
+          this.cityDataMap.set(city.name, weatherData);
+        });
 
-      this.updateDisplayedWeatherInfo(metrics);
-      this.selectedChartType = chartType;
-      this.selectedLayout = layout;
+        this.updateDisplayedWeatherInfo(metrics);
+        this.selectedChartType = chartType;
+        this.selectedLayout = layout;
+      },
+      complete: () => {
+        this.isLoading = false;
+      },
     });
   }
 

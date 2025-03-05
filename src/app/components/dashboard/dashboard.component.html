@@ -1,6 +1,13 @@
 <mat-card>
   <h2>Weather Overview</h2>
 
+  @if (errorMessage) {
+  <div class="error-message">
+    <mat-icon>error</mat-icon>
+    {{ errorMessage }}
+  </div>
+  }
+
   @if (isLoading) {
   <div class="loading-spinner">
     <mat-spinner></mat-spinner>
@@ -17,8 +24,7 @@
 
   @if (selectedLayout === 'table') {
   <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8">
-
-    @for(column of displayedColumns; track column) {
+    @for (column of displayedColumns; track column) {
     <ng-container [matColumnDef]="column.id">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>
         {{ column.label }}
@@ -32,9 +38,10 @@
     <tr mat-header-row *matHeaderRowDef="displayedColumnIds"></tr>
     <tr mat-row *matRowDef="let row; columns: displayedColumnIds" (click)="onCityClick(row)" class="clickable-row">
     </tr>
-
   </table>
-  } @else if (selectedLayout === 'card') {
+  }
+
+  @else if (selectedLayout === 'card') {
   <div class="card-grid">
     @for (card of dataSource.filteredData; track card.city) {
     <mat-card class="city-card" (click)="onCityClick(card)">
